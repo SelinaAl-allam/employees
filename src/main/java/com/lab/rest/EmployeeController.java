@@ -2,62 +2,54 @@ package com.lab.rest;
 
 import java.util.List;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
+
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 class EmployeeController {
 
-    private final EmployeeRepository repository;
+    private final EmployeeService employeeService;
 
-    EmployeeController(EmployeeRepository repository) {
-        this.repository = repository;
+    EmployeeController(EmployeeService employeeService) {
+        this.employeeService = employeeService;
     }
 
-
-    // Aggregate root
-    // tag::get-aggregate-root[]
     @GetMapping("/employees")
-    List<Employee> all() {
-        return repository.findAll();
+    List<EmployeeResponseDto> all() {
+        return employeeService.findAll()
+                .stream()
+                .map(EmployeeMapper::toDto)
+                .toList();
     }
-    // end::get-aggregate-root[]
 
     @PostMapping("/employees")
-    Employee newEmployee(@RequestBody Employee newEmployee) {
-        return repository.save(newEmployee);
+    EmployeeResponseDto newEmployee(@Valid @RequestBody EmployeeRequestDto request) {
+        Employee saved = employeeService.create(EmployeeMapper.toEntity(request));
+        return EmployeeMapper.toDto(saved);
     }
 
-    // Single item
-
     @GetMapping("/employees/{id}")
-    Employee one(@PathVariable Long id) {
+    EmployeeResponseDto one(@PathVariable Long id) {
+        return EmployeeMapper.toDto(employeeService.findById(id));
+    }
 
-        return repository.findById(id)
-                .orElseThrow(() -> new EmployeeNotFoundException(id));
+    @GetMapping("/employees/email/{email}")
+    EmployeeResponseDto email(@PathVariable String email) {
+        return EmployeeMapper.toDto(employeeService.findByEmail(email));
     }
 
     @PutMapping("/employees/{id}")
-    Employee replaceEmployee(@RequestBody Employee newEmployee, @PathVariable Long id) {
-
-        return repository.findById(id)
-                .map(employee -> {
-                    employee.setName(newEmployee.getName());
-                    employee.setRole(newEmployee.getRole());
-                    return repository.save(employee);
-                })
-                .orElseGet(() -> {
-                    return repository.save(newEmployee);
-                });
+    EmployeeResponseDto replaceEmployee(
+            @PathVariable Long id,
+            @Valid @RequestBody EmployeeRequestDto request
+    ) {
+        Employee updated = employeeService.replace(id, EmployeeMapper.toEntity(request));
+        return EmployeeMapper.toDto(updated);
     }
 
     @DeleteMapping("/employees/{id}")
     void deleteEmployee(@PathVariable Long id) {
-        repository.deleteById(id);
+        employeeService.deleteById(id);
     }
 }

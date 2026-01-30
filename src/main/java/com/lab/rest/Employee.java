@@ -2,9 +2,7 @@ package com.lab.rest;
 
 import java.util.Objects;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity
 public class Employee {
@@ -13,6 +11,9 @@ public class Employee {
     @GeneratedValue Long id;
     private String name;
     private String role;
+    @Column(unique = true)
+    private String email;
+    private double salary;
 
     public Employee() {}
 
@@ -34,6 +35,10 @@ public class Employee {
         return this.role;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -44,6 +49,10 @@ public class Employee {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     @Override
