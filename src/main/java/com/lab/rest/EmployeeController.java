@@ -1,12 +1,14 @@
 package com.lab.rest;
 
+import java.net.URI;
 import java.util.List;
 
-import jakarta.validation.Valid;
-
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
+@RequestMapping("/employees")
 class EmployeeController {
 
     private final EmployeeService employeeService;
@@ -15,41 +17,46 @@ class EmployeeController {
         this.employeeService = employeeService;
     }
 
-    @GetMapping("/employees")
-    List<EmployeeResponseDto> all() {
-        return employeeService.findAll()
-                .stream()
-                .map(EmployeeMapper::toDto)
-                .toList();
+    @GetMapping
+    List<Employee> all() {
+        return employeeService.findAll();
     }
 
-    @PostMapping("/employees")
-    EmployeeResponseDto newEmployee(@Valid @RequestBody EmployeeRequestDto request) {
-        Employee saved = employeeService.create(EmployeeMapper.toEntity(request));
-        return EmployeeMapper.toDto(saved);
-    }
-
-    @GetMapping("/employees/{id}")
-    EmployeeResponseDto one(@PathVariable Long id) {
-        return EmployeeMapper.toDto(employeeService.findById(id));
-    }
-
-    @GetMapping("/employees/email/{email}")
-    EmployeeResponseDto email(@PathVariable String email) {
-        return EmployeeMapper.toDto(employeeService.findByEmail(email));
-    }
-
-    @PutMapping("/employees/{id}")
-    EmployeeResponseDto replaceEmployee(
-            @PathVariable Long id,
-            @Valid @RequestBody EmployeeRequestDto request
+    // POST /employees -> 201 Created + Location: /employees/{id}
+    @PostMapping
+    ResponseEntity<Employee> newEmployee(
+            @RequestBody Employee newEmployee,
+            UriComponentsBuilder uriBuilder
     ) {
-        Employee updated = employeeService.replace(id, EmployeeMapper.toEntity(request));
-        return EmployeeMapper.toDto(updated);
+        Employee saved = employeeService.create(newEmployee);
+
+        URI location = uriBuilder
+                .path("/employees/{id}")
+                .buildAndExpand(saved.getId())
+                .toUri();
+
+        return ResponseEntity.created(location).body(saved);
     }
 
-    @DeleteMapping("/employees/{id}")
-    void deleteEmployee(@PathVariable Long id) {
-        employeeService.deleteById(id);
+    @GetMapping("/{id}")
+    Employee one(@PathVariable Long id) {
+        return employeeService.findById(id);
+    }
+
+    // PUT update-only: 200 OK on update; 404 if missing
+    @PutMapping("/{id}")
+    ResponseEntity<Employee> replaceEmployee(
+            @PathVariable Long id,
+            @RequestBody Employee newEmployee
+    ) {
+        Employee updated = employeeService.updateExisting(id, newEmployee);
+        return ResponseEntity.ok(updated);
+    }
+
+    // DELETE -> 204 No Content; 404 if missing
+    @DeleteMapping("/{id}")
+    ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+        employeeService.deleteByIdOrThrow(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-public class EmployeeServiceImpl implements EmployeeService {
+public class EmployeeServiceImpl  {
 
     private final EmployeeRepository repository;
 
@@ -15,51 +15,37 @@ public class EmployeeServiceImpl implements EmployeeService {
         this.repository = repository;
     }
 
-    @Override
     @Transactional(readOnly = true)
     public List<Employee> findAll() {
         return repository.findAll();
     }
 
-    @Override
     public Employee create(Employee employee) {
+        // Optional: ensure client doesn't control ID
+        // employee.setId(null);
         return repository.save(employee);
     }
 
-    @Override
     @Transactional(readOnly = true)
     public Employee findById(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new EmployeeNotFoundException(id));
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Employee findByEmail(String email) {
-        return repository.findByEmail(email)
-                .orElseThrow(() -> new EmployeeNotFoundException(email));
+    // Update-only: throws 404 if not found
+    public Employee updateExisting(Long id, Employee newEmployee) {
+        Employee existing = repository.findById(id)
+                .orElseThrow(() -> new EmployeeNotFoundException(id));
+
+        existing.setName(newEmployee.getName());
+        existing.setRole(newEmployee.getRole());
+        // If you have email:
+        // existing.setEmail(newEmployee.getEmail());
+
+        return repository.save(existing);
     }
 
-    @Override
-    public Employee replace(Long id, Employee newEmployee) {
-        return repository.findById(id)
-                .map(existing -> {
-                    existing.setName(newEmployee.getName());
-                    existing.setRole(newEmployee.getRole());
-                    // keep id stable; do NOT replace it from the body
-                    return repository.save(existing);
-                })
-                .orElseGet(() -> {
-                    // If you want PUT to create when not found:
-                    // ensure the entity uses the path id
-                    newEmployee.setId(id);
-                    return repository.save(newEmployee);
-                });
-    }
-
-    @Override
-    public void deleteById(Long id) {
-        // Optional: validate existence first (gives nicer error behavior)
+    public void deleteByIdOrThrow(Long id) {
         if (!repository.existsById(id)) {
             throw new EmployeeNotFoundException(id);
         }
