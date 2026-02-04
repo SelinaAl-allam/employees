@@ -7,6 +7,6 @@ public interface EmployeeService {
     Employee create(Employee employee);
     Employee findById(Long id);
     Employee findByEmail(String email);
-    Employee replace(Long id, Employee newEmployee);
-    void deleteById(Long id);
+    Employee updateExisting(Long id, Employee newEmployee);
+    void deleteByIdOrThrow(Long id);
 }

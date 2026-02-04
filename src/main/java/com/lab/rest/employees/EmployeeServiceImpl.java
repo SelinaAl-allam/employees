@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-public class EmployeeServiceImpl  {
+public class EmployeeServiceImpl implements EmployeeService  {
 
     private final EmployeeRepository repository;
 
