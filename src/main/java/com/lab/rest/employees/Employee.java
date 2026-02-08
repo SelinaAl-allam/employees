@@ -2,6 +2,7 @@ package com.lab.rest.employees;
 
 import java.util.Objects;
 
+import com.lab.rest.Department.Department;
 import jakarta.persistence.*;
 
 @Entity
@@ -14,6 +15,9 @@ public class Employee {
     @Column(unique = true)
     private String email;
     private double salary;
+    @ManyToOne
+    @JoinColumn(name = "department_id", nullable = true)
+    private Department department;
 
     public Employee() {}
 
@@ -54,6 +58,10 @@ public class Employee {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public Department getDepartment() {return department;}
+
+    public void setDepartment(Department department) {this.department = department;}
 
     @Override
     public boolean equals(Object o) {

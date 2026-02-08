@@ -2,6 +2,9 @@ package com.lab.rest.employees;
 
 import java.util.List;
 
+import com.lab.rest.Department.Department;
+import com.lab.rest.Department.DepartmentNotFoundException;
+import com.lab.rest.Department.DepartmentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,9 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class EmployeeServiceImpl  {
 
     private final EmployeeRepository repository;
+    private final DepartmentRepository departmentRepository;
 
-    public EmployeeServiceImpl(EmployeeRepository repository) {
+    public EmployeeServiceImpl(EmployeeRepository repository, DepartmentRepository departmentRepository) {
         this.repository = repository;
+        this.departmentRepository = departmentRepository;
     }
 
     @Transactional(readOnly = true)
@@ -56,5 +61,17 @@ public class EmployeeServiceImpl  {
             throw new EmployeeNotFoundException(id);
         }
         repository.deleteById(id);
+    }
+
+    @Transactional
+    public Employee assignToDepartment(Long employeeId, Long departmentId) {
+        Employee employee = repository.findById(employeeId)
+                .orElseThrow(() -> new EmployeeNotFoundException(employeeId));
+
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new DepartmentNotFoundException(departmentId));
+
+        employee.setDepartment(department);
+        return repository.save(employee);
     }
 }
