@@ -1,87 +1,72 @@
 package com.lab.rest.employees;
 
-import java.util.Objects;
-
 import com.lab.rest.Department.Department;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.PositiveOrZero;
+import java.time.LocalDate;
 
 @Entity
+@Table(name = "employees")
 public class Employee {
 
-    private @Id
-    @GeneratedValue Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotBlank
     private String name;
+
+    @NotBlank
     private String role;
+
+    @NotBlank
+    @Email
     @Column(unique = true)
     private String email;
-    private double salary;
-    @ManyToOne
-    @JoinColumn(name = "department_id", nullable = true)
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
     private Department department;
 
+    @PositiveOrZero
+    private Integer yearsOfExperience;
+
+    @PastOrPresent
+    private LocalDate hiredDate;
+
+    // Constructors
     public Employee() {}
 
-    public Employee(String name, String role) {
-
+    public Employee(String name, String role, String email) {
         this.name = name;
         this.role = role;
-    }
-
-    public Long getId() {
-        return this.id;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public String getRole() {
-        return this.role;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public void setEmail(String email) {
         this.email = email;
     }
 
-    public Department getDepartment() {return department;}
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setDepartment(Department department) {this.department = department;}
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    @Override
-    public boolean equals(Object o) {
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 
-        if (this == o)
-            return true;
-        if (!(o instanceof Employee))
-            return false;
-        Employee employee = (Employee) o;
-        return Objects.equals(this.id, employee.id) && Objects.equals(this.name, employee.name)
-                && Objects.equals(this.role, employee.role);
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public Department getDepartment() { return department; }
+    public void setDepartment(Department department) { this.department = department; }
+
+    public Integer getYearsOfExperience() { return yearsOfExperience; }
+    public void setYearsOfExperience(Integer yearsOfExperience) {
+        this.yearsOfExperience = yearsOfExperience;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.id, this.name, this.role);
-    }
-
-    @Override
-    public String toString() {
-        return "Employee{" + "id=" + this.id + ", name='" + this.name + '\'' + ", role='" + this.role + '\'' + '}';
-    }
+    public LocalDate getHiredDate() { return hiredDate; }
+    public void setHiredDate(LocalDate hiredDate) { this.hiredDate = hiredDate; }
 }

@@ -1,9 +1,10 @@
 package com.lab.rest.employees;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PastOrPresent;
+import jakarta.validation.constraints.PositiveOrZero;
+import java.time.LocalDate;
 
 public class EmployeeRequestDto {
 
@@ -17,7 +18,13 @@ public class EmployeeRequestDto {
     @Email
     private String email;
 
+    @PositiveOrZero
+    private Integer yearsOfExperience;
 
+    @PastOrPresent
+    private LocalDate hiredDate;
+
+    // Getters and Setters
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
@@ -26,4 +33,12 @@ public class EmployeeRequestDto {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public Integer getYearsOfExperience() { return yearsOfExperience; }
+    public void setYearsOfExperience(Integer yearsOfExperience) {
+        this.yearsOfExperience = yearsOfExperience;
+    }
+
+    public LocalDate getHiredDate() { return hiredDate; }
+    public void setHiredDate(LocalDate hiredDate) { this.hiredDate = hiredDate; }
 }
